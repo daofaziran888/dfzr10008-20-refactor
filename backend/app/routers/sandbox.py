@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/sandbox", tags=["产品沙箱测试"])
 
 service = SandboxService()
 
-LIST_FIELDS = ["实例编号", "测试产品", "测试参数", "预期输出", "实际输出", "差异对比", "测试耗时", "实例状态"]
+LIST_FIELDS = ["实例编号", "测试产品", "测试接口", "测试参数", "测试版本号", "冻结接口编号", "冻结契约版本", "预期输出", "实际输出", "差异对比", "输出契约版本", "比对契约版本", "测试耗时", "实例状态"]
 STATUSES = ["草稿", "测试中", "测试完成", "已关闭"]
 
 
@@ -28,6 +28,13 @@ def list_entries(
         raise HTTPException(status_code=400, detail="每页最多 200 条，请缩小分页范围")
     items, total = service.list_entries(keyword=keyword, status=status, page=page, size=size)
     return PageResult(items=items, total=total, page=page, size=size)
+
+
+@router.get("/test-versions")
+def list_test_versions() -> dict[str, Any]:
+    """测试版本台账：每条记录对应一次开始测试时冻结的契约快照。"""
+    items = service.list_test_versions()
+    return {"module": "sandbox_test_version", "total": len(items), "items": items}
 
 
 @router.get("/{entry_id}", response_model=dict)
@@ -50,9 +57,9 @@ def create_entry(payload: EntryPayload) -> ActionResult:
 
 @router.post("/{entry_id}/actions", response_model=ActionResult)
 def run_action(entry_id: int, payload: EntryPayload) -> ActionResult:
-    """对单条沙箱实例执行开始测试、关闭实例、归档结果；不允许的动作会被拦下并说明原因。"""
+    """对单条沙箱实例执行开始测试、重新比对、关闭实例、归档结果；不允许的动作会被拦下并说明原因。"""
     action = str(payload.values.get("action") or "").strip()
-    entry, message = service.run_action(entry_id, action)
+    entry, message = service.run_action(entry_id, action, payload.values)
     if entry is None:
         return ActionResult(ok=False, message=message)
     return ActionResult(ok=True, message=message, entry=entry)

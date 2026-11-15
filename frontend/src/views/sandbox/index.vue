@@ -70,8 +70,8 @@ import { request } from '@/api/client'
 type Row = Record<string, string | number | null>
 
 const ENDPOINT = '/api/sandbox'
-const columns = ["实例编号", "测试产品", "测试参数", "预期输出", "实际输出", "差异对比", "测试耗时", "实例状态"]
-const actions = ["开始测试", "关闭实例", "归档结果"]
+const columns = ["实例编号", "测试产品", "测试接口", "测试版本号", "冻结契约版本", "预期输出", "实际输出", "差异对比", "比对契约版本", "实例状态"]
+const actions = ["开始测试", "重新比对", "关闭实例", "归档结果"]
 const statuses = ["草稿", "测试中", "测试完成", "已关闭"]
 const stats = [{"label": "沙箱实例总数", "value": 0}, {"label": "测试中实例", "value": 0}, {"label": "测试完成实例", "value": 0}]
 
